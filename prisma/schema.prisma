@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Website {
+  id              String   @id @default(uuid())
+  name            String
+  url             String
+  hostingProvider String?
+  serverDetails   String?
+  wpVersion       String?
+  phpVersion      String?
+  dbVersion       String?
+  notes           String?
+  status          String   @default("active") // active, archived
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  changes     ChangeLog[]
+  tasks       Task[]
+  issues      Issue[]
+  plugins     PluginUpdate[]
+  themes      ThemeUpdate[]
+  backups     Backup[]
+  deployments Deployment[]
+  docs        Document[]
+  maintenance MaintenanceLog[]
+}
+
+model ChangeLog {
+  id           String   @id @default(uuid())
+  websiteId    String
+  date         DateTime @default(now())
+  title        String
+  description  String
+  changeType   String
+  priority     String
+  status       String
+  timeSpent    Int?     // in minutes
+  tags         String?  // comma separated
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  website      Website  @relation(fields: [websiteId], references: [id])
+}
+
+model MaintenanceLog {
+  id           String   @id @default(uuid())
+  websiteId    String
+  date         DateTime @default(now())
+  activity     String
+  details      String
+  timeSpent    Int?     // in minutes
+  outcome      String
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deletedAt    DateTime?
+
+  website      Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  websiteId   String?
+  title       String
+  description String
+  priority    String
+  status      String
+  dueDate     DateTime?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  website     Website? @relation(fields: [websiteId], references: [id])
+}
+
+model Issue {
+  id              String   @id @default(uuid())
+  websiteId       String
+  title           String
+  description     String
+  severity        String
+  status          String
+  resolutionNotes String?
+  dateReported    DateTime @default(now())
+  dateResolved    DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  website         Website  @relation(fields: [websiteId], references: [id])
+}
+
+model PluginUpdate {
+  id          String   @id @default(uuid())
+  websiteId   String
+  pluginName  String
+  oldVersion  String?
+  newVersion  String
+  updateDate  DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  website     Website  @relation(fields: [websiteId], references: [id])
+}
+
+model ThemeUpdate {
+  id          String   @id @default(uuid())
+  websiteId   String
+  themeName   String
+  oldVersion  String?
+  newVersion  String
+  updateDate  DateTime @default(now())
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  website     Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Backup {
+  id              String   @id @default(uuid())
+  websiteId       String
+  backupDate      DateTime @default(now())
+  backupType      String
+  storageLocation String
+  fileSize        String?
+  notes           String?
+  status          String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+
+  website         Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Deployment {
+  id               String   @id @default(uuid())
+  websiteId        String
+  deploymentDate   DateTime @default(now())
+  environment      String
+  description      String
+  version          String?
+  deploymentResult String
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  deletedAt        DateTime?
+
+  website          Website  @relation(fields: [websiteId], references: [id])
+}
+
+model Document {
+  id          String   @id @default(uuid())
+  websiteId   String?
+  title       String
+  category    String
+  content     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  website     Website? @relation(fields: [websiteId], references: [id])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  action         String
+  entity         String
+  entityId       String
+  previousValues String?
+  newValues      String?
+  timestamp      DateTime @default(now())
+}
